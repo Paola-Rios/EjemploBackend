@@ -63,3 +63,24 @@ exports.updateProduct = catchAsync(async (req, res) => {
   }
 
 });
+
+exports.deleteProduct = catchAsync(async (req, res) => {
+  const foundProduct = await Product.findById(req.params.id);
+  if(foundProduct) {
+   foundProduct.deleteOne();
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        product: foundProduct,
+      },
+    });
+  } else {
+    res.status(404).json({
+      status: "not found",
+    });
+  }
+
+});
+
+

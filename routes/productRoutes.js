@@ -14,6 +14,6 @@ productRouter
   //TODO: uncomment the following line
   // .all(authController.protect)
   .get(productController.getProductById)
-  .put(productController.updateProduct);
-
+  .put(productController.updateProduct)
+  .delete(productController.deleteProduct);
 module.exports = productRouter;
