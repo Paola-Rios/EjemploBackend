@@ -1,4 +1,4 @@
-const fs = require("fs");
+// const fs = require("fs");
 const Product = require("../models/Product");
 const catchAsync = require("../utils/catchAsync");
 
@@ -39,4 +39,27 @@ exports.getProductById = catchAsync(async (req, res) => {
       status: "not found",
     });
   }
+});
+
+exports.updateProduct = catchAsync(async (req, res) => {
+  const foundProduct = await Product.findById(req.params.id);
+  if(foundProduct) {
+    const updatedProduct = req.body;
+    foundProduct.productName = updatedProduct.productName;
+    foundProduct.price = updatedProduct.price;
+    foundProduct.description = updatedProduct.description;
+    foundProduct.save();
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        product: foundProduct,
+      },
+    });
+  } else {
+    res.status(404).json({
+      status: "not found",
+    });
+  }
+
 });
