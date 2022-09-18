@@ -61,38 +61,29 @@ exports.addCart = catchAsync(async (req, res) => {
 exports.deleteProduct = catchAsync(async (req, res) => {
 
   //Validamos si el cart ya existe
-  let cart = null;
   const user = req.user;
-  Cart.findOne({userId: user.id, status: false}, function(err, docs) {
-    if (err) {
-      res.status(404).json({
-        status: "No existe un carrito para el usuario.",
-      });
-      return;
-    } else {
-      cart = docs;
-    }
-  });
-
-  //ver si existe el producto
-  //Buscar si el producto existe y modificarlo
-  CartProduct.findOneAndDelete({productId: req.params.id, cartId: cart.id} , function(err, docs) {
-    if (err) {
-      console.log("Error: el producto no existe.");
-      console.log(err);
-
+  let cart = await Cart.findOne({userId: user.id, status: false});
+  if(!cart){
+    res.status(200).json({
+      status: "success",
+      message: "Error. No hay carrito para el usuario."
+    });
+  } else {
+    let product = await CartProduct.findOne({productId: req.params.id, cartId: cart.id});
+    if(!product){
       res.status(200).json({
         status: "success",
-        message: `El producto con id {req.params.id} no existia en el carrito.`
+        message: "Info. El producto no estaba en el cart."
       });
     } else {
-      console.log(`El producto con id {req.params.id} fue borrado del carrito.`);
+      product.deleteOne();
       res.status(200).json({
         status: "success",
-        message: `El producto con id {req.params.id} fue borrado del carrito.`
+        data: product,
+        message: "Info. El producto fue eliminado."
       });
     }
-  });
+  }
 });
 
 exports.payCart = catchAsync(async (req, res) => {
