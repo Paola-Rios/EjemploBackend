@@ -5,6 +5,7 @@ const MyError = require("../utils/MyError");
 const catchAsync = require("../utils/catchAsync");
 const jwt = require("jsonwebtoken");
 const { promisify } = require("util");
+const { Console } = require("console");
 
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -80,6 +81,8 @@ exports.protect = catchAsync(async (req, res, next) => {
     );
   }
   currentUser = currentUser.toObject();
+  currentUser.id = currentUser._id.toString();
+
   delete currentUser.password;
   // GRANT ACCESS TO PROTECTED ROUTE
   req.user = currentUser;

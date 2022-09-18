@@ -70,8 +70,6 @@ exports.updateUser = catchAsync(async (req, res) => {
     const updatedUser = req.body;
     foundUser.userName = updatedUser.userName;
     // Update password to be encrypted.
-    
-    
     req.body.password = crypto
     .createHash("sha256")
     .update(req.body.password)

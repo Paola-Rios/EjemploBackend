@@ -9,7 +9,7 @@ exports.addCart = catchAsync(async (req, res) => {
   const user = req.user;
   
   //Validamos si el producto existe
-  const product = Product.findById(req.body.ProductId);
+  const product = await Product.findById(req.body.ProductId);
   if(!product) {
     res.status(404).json({
       status: "Product not found.",
@@ -26,52 +26,33 @@ exports.addCart = catchAsync(async (req, res) => {
     return;
   }
 
-  //Validamos si el cart ya existe
-  let cart = null;
-  let isOldCart = false;
-  Cart.findOne({userId: user.id, status: false}, function(err, docs) {
-    if (!err) {
-      cart = docs;
-      isOldCart = true;
-    }
-  });
-
   //Agregar un nuevo cart si no existe
+  let cart = await Cart.findOne({userId: user.id, status: false});
   if(!cart) {
     cart = await Cart.create({
-      UserId: user.id, 
-      status : false
-    });
+              userId: user.id, 
+              status: false
+            });
   }
 
-  if(isOldCart) {
-    //Buscar si el producto existe y modificarlo
-    CartProduct.findOne({productId: req.body.ProductId, cartId: cart.id} , function(err, docs) {
-      if (err) {
-        CartProduct.create({
-          productId: req.body.ProductId, 
-          cartId: cart.id, 
-          cantidad: req.body.Cantidad
-        });
-      } else {
-        let cartProduct = CartProduct.findById(docs.id);
-        cartProduct.cantidad = req.body.Cantidad;
-        cartProduct.save();
-      }
-    })
-  } else {
-    //Solo añadir el producto
-    CartProduct.create({
+  let cartProduct = await CartProduct.findOne({productId: req.body.ProductId, cartId: cart.id});
+  console.log(cartProduct);
+
+  if(!cartProduct){
+    cartProduct = await CartProduct.create({
       productId: req.body.ProductId, 
       cartId: cart.id, 
       cantidad: req.body.Cantidad
     });
+  } else {
+    cartProduct.cantidad = req.body.Cantidad;
+    cartProduct.save();
   }
 
   res.status(200).json({
     status: "success",
     data: {
-      cart: cart,
+       cart: cart,
     },
   });
 });

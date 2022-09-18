@@ -5,13 +5,16 @@ const cartRouter = express.Router();
 //routes
 cartRouter
   .route("/product")
+  .all(authController.protect)
   .post(cartController.addCart);
 
 cartRouter
   .route("/product/:id")
+  .all(authController.protect)
   .delete(cartController.deleteProduct);
 
 cartRouter
   .route("/pay")
+  .all(authController.protect)
   .post(cartController.payCart);
 module.exports = cartRouter;
