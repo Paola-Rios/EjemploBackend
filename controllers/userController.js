@@ -54,3 +54,50 @@ exports.getAllUsers = catchAsync(async (req, res) => {
     },
   });
 });
+
+
+exports.updateUser = catchAsync(async (req, res) => {
+  let foundUser = await User.findById(req.params.id);
+  if(foundUser) {
+    const updatedUser = req.body;
+    foundUser.userName = updatedUser.userName;
+    //TODO: Update password to be encrypted.
+    foundUser.password = updatedUser.password;
+    foundUser.email = updatedUser.email;
+    foundUser.save();
+
+    foundUser = foundUser.toObject()
+    delete foundUser.password;
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        user: foundUser,
+      },
+    });
+  } else {
+    res.status(404).json({
+      status: "not found",
+    });
+  }
+});
+
+exports.deleteUser = catchAsync(async (req, res) => {
+  let foundUser = await User.findById(req.params.id);
+  if(foundUser) {
+    foundUser.deleteOne();
+    foundUser = foundUser.toObject()
+    delete foundUser.password;
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        user: foundUser,
+      },
+    });
+  } else {
+    res.status(404).json({
+      status: "not found",
+    });
+  }
+});

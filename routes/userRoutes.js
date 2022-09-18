@@ -13,7 +13,7 @@ userRouter
 //TODO: uncomment the following line
 // .all(authController.protect)
 .get(userController.getUserById)
-// .put(userController.updateUser)
-// .delete(userController.deleteUser);
+.put(userController.updateUser)
+.delete(userController.deleteUser);
 
 module.exports = userRouter;
