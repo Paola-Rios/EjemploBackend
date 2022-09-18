@@ -5,14 +5,12 @@ const productRouter = express.Router();
 //routes
 productRouter
   .route("/")
-  //TODO: uncomment the following line
-  // .all(authController.protect)
+   .all(authController.protect)
   .get(productController.getAllProducts)
   .post(productController.addProduct);
 productRouter
   .route("/:id")
-  //TODO: uncomment the following line
-  // .all(authController.protect)
+  .all(authController.protect)
   .get(productController.getProductById)
   .put(productController.updateProduct)
   .delete(productController.deleteProduct);
