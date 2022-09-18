@@ -4,8 +4,16 @@ const userRouter = express.Router();
 //routes
 userRouter
   .route("/")
-  //.get(productController.getAllProducts)
+  //TODO: uncomment the following line
+  // .all(authController.protect)
+  .get(userController.getAllUsers)
   .post(userController.addUser);
-//productRouter.route("/:id").get(productController.getProductById);
+userRouter
+.route("/:id")
+//TODO: uncomment the following line
+// .all(authController.protect)
+.get(userController.getUserById)
+// .put(userController.updateUser)
+// .delete(userController.deleteUser);
 
 module.exports = userRouter;
