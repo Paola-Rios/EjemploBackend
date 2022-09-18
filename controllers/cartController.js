@@ -89,31 +89,23 @@ exports.deleteProduct = catchAsync(async (req, res) => {
 exports.payCart = catchAsync(async (req, res) => {
 
   //Validamos si el cart ya existe
-  let cart = null;
   const user = req.user;
-  Cart.findOne({userId: user.id, status: false}, function(err, docs) {
-    if (err) {
-      res.status(404).json({
-        status: "No existe un carrito para el usuario.",
-      });
-      return;
-    } else {
-      cart = docs;
-    }
-  });
 
-  if(cart){
-    let paidCart = await Cart.findById(cart.id)
-    paidCart.status = true;
-    paidCart.save();
-
-    //TODO: calcular el costo total del carrito y devolver.
-
+  //Agregar un nuevo cart si no existe
+  let cart = await Cart.findOne({userId: user.id, status: false});
+  if(cart) {
+    cart.status = true;
+    cart.save();
     res.status(200).json({
       status: "success",
       message: `El carrito fue pagado correctamente.`
     });
-  } 
+  } else {
+    res.status(400).json({
+      status: "success",
+      message: "No existe un carrito pendiente para el usuario."
+    });
+  }
 });
 
 
