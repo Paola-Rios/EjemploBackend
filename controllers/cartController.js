@@ -5,19 +5,6 @@ const Cart = require("../models/Cart");
 const User = require("../models/User");
 const catchAsync = require("../utils/catchAsync");
 
-exports.getAllProducts = catchAsync(async (req, res) => {
-  const products = await Product.find();
-
-  res.status(200).json({
-    status: "success",
-    timeOfRequest: req.requestTime,
-    results: products.length,
-    data: {
-      products,
-    },
-  });
-});
-
 exports.addCart = catchAsync(async (req, res) => {
   const user = req.user;
   
@@ -32,7 +19,7 @@ exports.addCart = catchAsync(async (req, res) => {
 
   //validamos cantidad
   const cantidad = req.body.Cantidad;
-  if(cantidad < 0){
+  if(cantidad < 1){
     res.status(404).json({
       status: "Quantity cannot be less than 0.",
     });
@@ -89,62 +76,72 @@ exports.addCart = catchAsync(async (req, res) => {
   });
 });
 
-exports.getProductById = catchAsync(async (req, res) => {
-  const foundProduct = await Product.findById(req.params.id);
-  if (foundProduct) {
-    res.status(200).json({
-      status: "success",
-      data: {
-        product: foundProduct,
-      },
-    });
-  } else {
-    res.status(404).json({
-      status: "not found",
-    });
-  }
-});
-
-exports.updateProduct = catchAsync(async (req, res) => {
-  const foundProduct = await Product.findById(req.params.id);
-  if(foundProduct) {
-    const updatedProduct = req.body;
-    foundProduct.productName = updatedProduct.productName;
-    foundProduct.price = updatedProduct.price;
-    foundProduct.description = updatedProduct.description;
-    foundProduct.save();
-
-    res.status(200).json({
-      status: "success",
-      data: {
-        product: foundProduct,
-      },
-    });
-  } else {
-    res.status(404).json({
-      status: "not found",
-    });
-  }
-
-});
 
 exports.deleteProduct = catchAsync(async (req, res) => {
-  const foundProduct = await Product.findById(req.params.id);
-  if(foundProduct) {
-   foundProduct.deleteOne();
+
+  //Validamos si el cart ya existe
+  let cart = null;
+  const user = req.user;
+  Cart.findOne({userId: user.id, status: false}, function(err, docs) {
+    if (err) {
+      res.status(404).json({
+        status: "No existe un carrito para el usuario.",
+      });
+      return;
+    } else {
+      cart = docs;
+    }
+  });
+
+  //ver si existe el producto
+  //Buscar si el producto existe y modificarlo
+  CartProduct.findOneAndDelete({productId: req.params.id, cartId: cart.id} , function(err, docs) {
+    if (err) {
+      console.log("Error: el producto no existe.");
+      console.log(err);
+
+      res.status(200).json({
+        status: "success",
+        message: `El producto con id {req.params.id} no existia en el carrito.`
+      });
+    } else {
+      console.log(`El producto con id {req.params.id} fue borrado del carrito.`);
+      res.status(200).json({
+        status: "success",
+        message: `El producto con id {req.params.id} fue borrado del carrito.`
+      });
+    }
+  });
+});
+
+exports.payCart = catchAsync(async (req, res) => {
+
+  //Validamos si el cart ya existe
+  let cart = null;
+  const user = req.user;
+  Cart.findOne({userId: user.id, status: false}, function(err, docs) {
+    if (err) {
+      res.status(404).json({
+        status: "No existe un carrito para el usuario.",
+      });
+      return;
+    } else {
+      cart = docs;
+    }
+  });
+
+  if(cart){
+    let paidCart = await Cart.findById(cart.id)
+    paidCart.status = true;
+    paidCart.save();
+
+    //TODO: calcular el costo total del carrito y devolver.
 
     res.status(200).json({
       status: "success",
-      data: {
-        product: foundProduct,
-      },
+      message: `El carrito fue pagado correctamente.`
     });
-  } else {
-    res.status(404).json({
-      status: "not found",
-    });
-  }
-
+  } 
 });
 
 
